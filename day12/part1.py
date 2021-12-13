@@ -1,21 +1,23 @@
 
-caves = dict()
-with open('test1.txt') as f:
+graph = dict()
+with open('input.txt') as f:
     for line in f:
         a, z = line.strip().split('-')
-        caves.setdefault(a, set()).add(z)
-        caves.setdefault(z, set()).add(a)
+        graph.setdefault(a, list()).append(z)
+        graph.setdefault(z, list()).append(a)
 
-parent = 'start'
-visited = set({parent})
-to_visit = list()
+def find_all_paths(start, end, active_path=list()):
+    active_path = active_path + [start]
+    if start == end:
+        return [active_path]
+    paths = list()
+    for n in graph[start]:
+        if n not in active_path or n.isupper():
+            for p in find_all_paths(n, end, active_path):
+                paths.append(p)
+    return paths
 
-to_visit.extend(list(caves[parent]))
-while to_visit:
-    n = to_visit.pop()
-    print(parent, n)
-    if n.islower():
-        visited.add(n)
-    parent = n
-    if parent not in visited:
-        to_visit.extend(list(caves[parent]))
+paths = find_all_paths('start', 'end')
+for p in paths:
+    print(p)
+print(len(paths))
