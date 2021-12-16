@@ -1,18 +1,19 @@
+import sys
 
-with open('input.txt') as f:
+with open(sys.argv[1]) as f:
     h = f.read().strip()
     i = int(h, 16)
     b = format(i, '0>8b')
 
 operators = [
-    'add',   # 0
-    'mult',  # 1
-    'min',   # 2
-    'max',   # 3
-    '',      # 4
-    'gt',    # 5
-    'lt',    # 6
-    'eq'     # 7
+    'add',     # 0
+    'mult',    # 1
+    'min',     # 2
+    'max',     # 3
+    'literal', # 4
+    'gt',      # 5
+    'lt',      # 6
+    'eq'       # 7
 ]
 
 def resolve(index=0):
@@ -23,7 +24,7 @@ def resolve(index=0):
     # literal
     if t == 4:
         v = p['value']
-        print(f'{index}: literal {v}')
+        print(f'{index}: {operators[t]} {v}')
     # conditions
     if t > 4:
         print(f'{index}: resolving condition operands')
@@ -59,11 +60,13 @@ def resolve(index=0):
             i = index + 1
             while True:
                 np = packets[i]
-                bits += np['size']
+                size = np['size']
+                bits += size
+                print(i, size, bits, count)
                 if bits > count: break
                 stack.append(resolve(i))
                 i += 1
-        print(f'{index}: {operators[t]}({stack})')
+        print(f'{index}: {operators[t]}{stack}')
         if t == 0:
             v = sum(stack)
         if t == 1:
@@ -79,6 +82,7 @@ def resolve(index=0):
 
 packets = list()
 pos = 0
+print(b)
 while pos < len(b):
     start = pos
 
@@ -90,6 +94,7 @@ while pos < len(b):
         t = int(''.join(b[pos:pos+3]), 2)
         pos += 3
         packet['type'] = (t, operators[t])
+
         # literal
         if t == 4:
             value = ''
