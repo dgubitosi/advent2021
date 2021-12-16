@@ -82,7 +82,7 @@ def resolve(index=0):
 
 packets = list()
 pos = 0
-print(b)
+#print(b)
 while pos < len(b):
     start = pos
 
@@ -120,14 +120,16 @@ while pos < len(b):
                 l = 15
             packet['value'] = int(''.join(b[pos:pos+l]), 2)
             pos += l
+
+        # packet end
+        if packet:
+            packet['size'] = pos - start
+            packets.append(packet)
+            print(len(packets)-1, pos, packet)
+
     except:
         pass
 
-    # packet end
-    if packet:
-        packet['size'] = pos - start
-        packets.append(packet)
-        print(len(packets)-1, pos, packet)
 
 r = resolve()
 print(r)

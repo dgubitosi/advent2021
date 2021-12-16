@@ -46,13 +46,14 @@ while pos < len(b):
             packet['value'] = int(''.join(b[pos:pos+l]), 2)
             pos += l
 
+        # packet end
+        if packet:
+            packet['size'] = pos - start
+            packets += 1
+            print(pos, packets, packet)
+
     except:
         pass
 
-    # packet end
-    if packet:
-        packet['size'] = pos - start
-        packets += 1
-        print(pos, packets, packet)
 
 print(sum_v)
