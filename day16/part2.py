@@ -1,6 +1,6 @@
 import sys
 
-with open(sys.argv[1]) as f:
+with open('input.txt') as f:
     h = f.read().strip()
     i = int(h, 16)
     b = format(i, '0>8b')
@@ -19,70 +19,95 @@ operators = [
 def resolve(index=0):
     v = None
     p = packets[index]
+    size = p['size']
     print(f'{index}:', p)
     t = p['type'][0]
-    # literal
+
+    # literals
     if t == 4:
         v = p['value']
         print(f'{index}: {operators[t]} {v}')
-    # conditions
-    if t > 4:
-        print(f'{index}: resolving condition operands')
-        a = resolve(index + 1)
-        b = resolve(index + 2)
-        # gt
-        print(f'{index}: {a} {operators[t]} {b}')
-        if t == 5:
-            v = int(a > b)
-        # lt
-        if t == 6:
-            v = int(a < b)
-        # eq
-        if t == 7:
-            v = int(a == b)
-    # stacks
-    if t < 4:
+        nextp = index + 1
+
+    # sub-packets
+    else:
         stack = list()
+        p = packets[index]
         length = p['length'][0]
         count = p['value']
-        text = f'{index}: resolving stack, {count}'
+        text = f'{index}: resolving sub-packets: {count}'
+
+        # packets
         if length:
-            # packets
             print(f'{text} packets')
-            i = 1
-            while i <= count:
-                stack.append(resolve(index + i))
+            i = 0
+            nextp = index + 1
+            while i < count:
+                if nextp >= len(packets): break
+                a, np = resolve(nextp)
+                stack.append(a)
+                nextp = np
                 i += 1
+ 
+        # bits
         else:
-            # bits
-            print(f'{text} packets')
-            bits = 0
+            print(f'{text} bits')
+
+            # true next packet is after the bit length
             i = index + 1
+            bits = 0
             while True:
-                np = packets[i]
-                size = np['size']
-                bits += size
-                print(i, size, bits, count)
+                if i >= len(packets): break
+                bits += packets[i]['size']
                 if bits > count: break
-                stack.append(resolve(i))
                 i += 1
-        print(f'{index}: {operators[t]}{stack}')
-        if t == 0:
-            v = sum(stack)
-        if t == 1:
-            v = 1
-            for s in stack:
-                v *= s
-        if t == 2:
-            v = min(stack)
-        if t == 3:
-            v = max(stack)
-    print(f'{index}: return {v}')
-    return v
+            nextp = i
+
+            # resolve packets within the bit boundary
+            i = index + 1
+            while i < nextp:
+                a, np = resolve(i)
+                stack.append(a)
+                i = np
+
+        # conditions
+        if t > 4:
+            print(f'{index}: resolving condition operands')
+            a = stack[0]
+            b = stack[1]
+
+            # gt
+            print(f'{index}: {a} {operators[t]} {b}')
+            if t == 5:
+                v = int(a > b)
+            # lt
+            if t == 6:
+                v = int(a < b)
+            # eq
+            if t == 7:
+                v = int(a == b)
+
+        # operations
+        # t < 4
+        else:
+            print(f'{index}: {operators[t]}{stack}')
+            if t == 0:
+                v = sum(stack)
+            if t == 1:
+                v = 1
+                for s in stack:
+                    v *= s
+            if t == 2:
+                v = min(stack)
+            if t == 3:
+                v = max(stack)
+
+    # return value and next packet index
+    print(f'{index}: return {v}, next {nextp}')
+    return v, nextp
 
 packets = list()
 pos = 0
-#print(b)
 while pos < len(b):
     start = pos
 
@@ -125,11 +150,12 @@ while pos < len(b):
         if packet:
             packet['size'] = pos - start
             packets.append(packet)
-            print(len(packets)-1, pos, packet)
+            index = len(packets)-1
+            print(index, b[start:pos])
+            print(index, pos, packet)
 
     except:
         pass
 
-
 r = resolve()
-print(r)
+print(r[0])

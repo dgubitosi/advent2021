@@ -55,5 +55,4 @@ while pos < len(b):
     except:
         pass
 
-
 print(sum_v)
