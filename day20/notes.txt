@@ -1,0 +1,1 @@
+This one was annoying.  The 'infinite' border of the image alternates between dark and lit pixels.  When determining the number of lit pixels, I picked the middle of my border area as a boundary.
