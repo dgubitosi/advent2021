@@ -1,7 +1,7 @@
 
 numbers = '0123456789'
 
-with open('test4.txt') as f:
+with open('input.txt') as f:
     result = ''
     for line in f:
         s = line.strip()
@@ -55,12 +55,12 @@ with open('test4.txt') as f:
                                 if result[j] in numbers:
                                     n = result[j] + n
                                 elif n:
-                                    print('left', n)
+                                    #print(iteration, 'left', n)
                                     nn = str(int(n) + int(left))
                                     loc = j + 1
-                                    print(result[:loc])
-                                    print(nn)
-                                    print(result[loc+len(n):])
+                                    #print(result[:loc])
+                                    #print(nn)
+                                    #print(result[loc+len(n):])
                                     result = result[:loc] + nn + result[loc+len(n):]
                                     start += 1
                                     break
@@ -73,7 +73,7 @@ with open('test4.txt') as f:
                                 if result[j] in numbers:
                                     n += result[j]
                                 elif n:
-                                    #print('right', n)
+                                    #print(iteration, 'right', n)
                                     nn = str(int(n) + int(right))
                                     loc = j - len(n)
                                     #print(result[:loc])
@@ -129,4 +129,14 @@ with open('test4.txt') as f:
 
         print(result)
 
-print(result)
+def magnitude(snailfish):
+
+    if isinstance(snailfish, int):
+        return snailfish
+
+    if isinstance(snailfish, list):
+        right = snailfish[1]
+        left = snailfish[0]
+        return 3 * magnitude(left) + 2 * magnitude(right)
+
+print(magnitude(eval(result)))
